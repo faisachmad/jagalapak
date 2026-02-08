@@ -1,10 +1,85 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const isMobileMenuOpen = ref(false)
+const showReferralPopup = ref(false)
+const showShareModal = ref(false)
+const referrerSource = ref('')
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+const toggleShareModal = () => {
+  showShareModal.value = !showShareModal.value
+}
+
+const shareTo = (platform) => {
+  const url = encodeURIComponent(window.location.href)
+  const text = encodeURIComponent('JagaLapak - Partner Digital UMKM No. #1. Urus toko online jadi lebih mudah!')
+  let shareUrl = ''
+  
+  switch(platform) {
+    case 'wa': shareUrl = `https://wa.me/?text=${text}%20${url}`; break
+    case 'fb': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break
+    case 'tw': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break
+  }
+  
+  window.open(shareUrl, '_blank')
+}
+
+onMounted(() => {
+  // Inject Schema.org JSON-LD
+  const script = document.createElement('script')
+  script.type = 'application/ld+json'
+  script.text = JSON.stringify(schemaData)
+  document.head.appendChild(script)
+
+  // Check if coming from social media
+  const ref = document.referrer.toLowerCase()
+  if (ref.includes('facebook') || ref.includes('t.co') || ref.includes('instagram') || ref.includes('whatsapp')) {
+    referrerSource.value = ref.includes('facebook') ? 'Facebook' : 
+                          ref.includes('t.co') ? 'Twitter/X' :
+                          ref.includes('instagram') ? 'Instagram' : 'WhatsApp'
+    
+    setTimeout(() => {
+      showReferralPopup.value = true
+    }, 2000)
+  }
+})
+
+// Schema.org JSON-LD
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "JagaLapak",
+  "image": "https://jagalapak.com/og-image.png",
+  "@id": "https://jagalapak.com",
+  "url": "https://jagalapak.com",
+  "telephone": "+6288804000959",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Makassar",
+    "addressLocality": "Makassar",
+    "addressRegion": "Sulawesi Selatan",
+    "postalCode": "90000",
+    "addressCountry": "ID"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": -5.1476,
+    "longitude": 119.4327
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    "opens": "09:00",
+    "closes": "17:00"
+  },
+  "sameAs": [
+    "https://facebook.com/jagalapak",
+    "https://instagram.com/jagalapak"
+  ]
 }
 </script>
 
@@ -83,7 +158,7 @@ const toggleMobileMenu = () => {
                 <div
                     class="relative z-10 bg-gradient-to-tr from-slate-800 to-slate-700 p-4 rounded-2xl shadow-2xl border border-slate-600 transform rotate-2 hover:rotate-0 transition duration-500">
                     <img src="https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                        alt="Dashboard Toko Online" class="rounded-xl opacity-90 hover:opacity-100 transition" />
+                        alt="Jasa Admin Marketplace JagaLapak - Partner Digital UMKM di Makassar" class="rounded-xl opacity-90 hover:opacity-100 transition" />
 
                     <!-- Floating Badge -->
                     <div
@@ -207,7 +282,7 @@ const toggleMobileMenu = () => {
             <div class="flex flex-col md:flex-row items-center gap-12">
                 <div class="md:w-1/2">
                     <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                        alt="Remote Work" class="rounded-2xl shadow-2xl" />
+                        alt="Tim Digital Admin JagaLapak mengelola toko online klien secara profesional dan remote" class="rounded-2xl shadow-2xl" />
                 </div>
                 <div class="md:w-1/2">
                     <h2 class="text-3xl font-bold text-slate-900 mb-6">Cara Kerja Remote (Jarak Jauh)</h2>
@@ -419,14 +494,95 @@ const toggleMobileMenu = () => {
         </div>
     </footer>
 
-    <!-- Floating WA Button -->
-    <a href="https://wa.me/6288804000959"
-        class="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition z-50 animate-bounce">
-        <i class="fab fa-whatsapp text-3xl"></i>
-    </a>
+    <!-- Floating WA & Share Buttons -->
+    <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+        <button @click="toggleShareModal"
+            class="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition transform hover:scale-110">
+            <i class="fas fa-share-alt text-2xl"></i>
+        </button>
+        <a href="https://wa.me/6288804000959"
+            class="bg-green-500 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition transform hover:scale-110 animate-bounce">
+            <i class="fab fa-whatsapp text-3xl"></i>
+        </a>
+    </div>
+
+    <!-- Social Referral Popup -->
+    <div v-if="showReferralPopup" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden animate-fade-in-up">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-emerald-500"></div>
+            <button @click="showReferralPopup = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center space-y-4">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-900">Halo Pengunjung {{ referrerSource }}!</h3>
+                <p class="text-slate-600">Terima kasih telah berkunjung dari {{ referrerSource }}. Kami punya penawaran spesial untuk Anda hari ini.</p>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <p class="text-blue-800 font-bold text-lg">DISKON 10%</p>
+                    <p class="text-blue-600 text-sm">Gunakan kode: <span class="font-mono bg-blue-100 px-2 py-1 rounded">SOCMED10</span></p>
+                </div>
+                <button @click="showReferralPopup = false" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition">
+                    Ambil Promo Sekarang
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div v-if="showShareModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showShareModal = false">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-fade-in-up">
+            <h3 class="text-xl font-bold text-slate-900 mb-6 text-center">Bagikan Ke Teman</h3>
+            <div class="grid grid-cols-3 gap-4">
+                <button @click="shareTo('wa')" class="flex flex-col items-center gap-2 group">
+                    <div class="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-green-500 group-hover:text-white transition">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <span class="text-xs font-medium text-slate-600">WhatsApp</span>
+                </button>
+                <button @click="shareTo('fb')" class="flex flex-col items-center gap-2 group">
+                    <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-blue-600 group-hover:text-white transition">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <span class="text-xs font-medium text-slate-600">Facebook</span>
+                </button>
+                <button @click="shareTo('tw')" class="flex flex-col items-center gap-2 group">
+                    <div class="w-14 h-14 bg-slate-100 text-slate-900 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-black group-hover:text-white transition">
+                        <i class="fab fa-x-twitter"></i>
+                    </div>
+                    <span class="text-xs font-medium text-slate-600">Twitter/X</span>
+                </button>
+            </div>
+            
+            <div class="mt-8">
+                <p class="text-xs text-slate-400 mb-2 uppercase tracking-wider font-bold">Atau Salin Link</p>
+                <div class="flex gap-2 p-2 bg-slate-50 border rounded-xl items-center">
+                    <input type="text" readonly value="https://jagalapak.com" class="bg-transparent text-xs text-slate-500 flex-1 outline-none px-2">
+                    <button @click="() => { navigator.clipboard.writeText('https://jagalapak.com'); alert('Link disalin!'); }" class="text-blue-600 text-xs font-bold px-3 py-1 bg-white shadow-sm rounded-lg hover:bg-blue-50 transition">
+                        Salin
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* Scoped styles specific to this component can go here */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
 </style>
