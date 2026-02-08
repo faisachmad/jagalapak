@@ -32,5 +32,5 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.PORT || '22' }}
         source: "dist/*"
-        target: "/var/www/jagalapak" # GANTI INI DENGAN folder di server Anda
+        target: ${{ secrets.TARGET_DIR }}
         strip_components: 1
