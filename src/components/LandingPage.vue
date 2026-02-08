@@ -5,6 +5,7 @@ const isMobileMenuOpen = ref(false)
 const showReferralPopup = ref(false)
 const showShareModal = ref(false)
 const referrerSource = ref('')
+const currentUrl = ref(typeof window !== 'undefined' ? window.location.origin : '')
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
@@ -54,8 +55,8 @@ const schemaData = {
   "@type": "LocalBusiness",
   "name": "JagaLapak",
   "image": "https://jagalapak.com/og-image.png",
-  "@id": "https://jagalapak.com",
-  "url": "https://jagalapak.com",
+  "@id": window.location.origin,
+  "url": window.location.origin,
   "telephone": "+6288804000959",
   "address": {
     "@type": "PostalAddress",
@@ -559,8 +560,8 @@ const schemaData = {
             <div class="mt-8">
                 <p class="text-xs text-slate-400 mb-2 uppercase tracking-wider font-bold">Atau Salin Link</p>
                 <div class="flex gap-2 p-2 bg-slate-50 border rounded-xl items-center">
-                    <input type="text" readonly value="https://jagalapak.com" class="bg-transparent text-xs text-slate-500 flex-1 outline-none px-2">
-                    <button @click="() => { navigator.clipboard.writeText('https://jagalapak.com'); alert('Link disalin!'); }" class="text-blue-600 text-xs font-bold px-3 py-1 bg-white shadow-sm rounded-lg hover:bg-blue-50 transition">
+                    <input type="text" readonly :value="currentUrl" class="bg-transparent text-xs text-slate-500 flex-1 outline-none px-2">
+                    <button @click="() => { navigator.clipboard.writeText(currentUrl); alert('Link disalin!'); }" class="text-blue-600 text-xs font-bold px-3 py-1 bg-white shadow-sm rounded-lg hover:bg-blue-50 transition">
                         Salin
                     </button>
                 </div>
